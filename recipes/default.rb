@@ -10,16 +10,13 @@
 include_recipe "rbenv::default"
 include_recipe "rbenv::ruby_build"
 
-ruby_versions = ["1.9.3-p385"]
-base_gems = %w{ bundler mixlib-shellout }
-
-ruby_versions.each do |v|
+node['opscode-ruby']['versions'].each do |v|
   rbenv_ruby v do
-    global true
+    global v == node['opscode-ruby']['global']
   end
 
-  base_gems.each do |g|
-    rbenv_gem g do
+  node['opscode-ruby']['base_gems'].each do |gem|
+    rbenv_gem gem do
       ruby_version v
     end
   end
