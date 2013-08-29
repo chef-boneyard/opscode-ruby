@@ -10,3 +10,6 @@ version          "0.1.1"
 # http://community.opscode.com/cookbooks/rbenv
 # https://github.com/RiotGames/rbenv-cookbook
 depends "rbenv", "~> 1.4.1"
+
+# This is required to install ruby on windows
+depends "7-zip", "~> 1.0.0"
