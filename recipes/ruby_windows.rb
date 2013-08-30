@@ -7,6 +7,18 @@
 # All rights reserved - Do Not Redistribute
 #
 
+#
+# Helper method that can prepares safe windows paths.
+#
+
+def windows_safe_path_join(*args)
+  ::File.join(args).gsub(::File::SEPARATOR, ::File::ALT_SEPARATOR)
+end
+
+def windows_safe_path_expand(arg)
+  ::File.expand_path(arg).gsub(::File::SEPARATOR, ::File::ALT_SEPARATOR)
+end
+
 # Where to get ruby for windows based on it's version
 windows_ruby_urls = {
   "1.9.3-p448" => {
@@ -37,33 +49,36 @@ end
 
 # Determine the directories which we will unpack ruby
 ruby_file_name = ruby_download_info["ruby_file_name"]
-installation_directory = ::File.join(node['opscode-ruby']['windows']['ruby_root'], ruby_version).gsub(::File::SEPARATOR, ::File::ALT_SEPARATOR)
-file_cache_path = ::File.expand_path(Chef::Config[:file_cache_path]).gsub(::File::SEPARATOR, ::File::ALT_SEPARATOR)
-unzip_dir_name = "#{file_cache_path}\\" << File.basename(ruby_file_name, ".7z")
+installation_directory = windows_safe_path_join(node['opscode-ruby']['windows']['ruby_root'], ruby_version)
+file_cache_path = windows_safe_path_expand(Chef::Config[:file_cache_path])
+unzip_dir_name = windows_safe_path_join(file_cache_path, File.basename(ruby_file_name, ".7z"))
+ruby_package_path = windows_safe_path_join(file_cache_path, ruby_file_name)
+zip_bin = windows_safe_path_join(node['7-zip']['home'], "7z.exe")
 
-remote_file "#{file_cache_path}/#{ruby_file_name}" do
+remote_file ruby_package_path do
   source ruby_download_info['ruby_url']
   checksum ruby_download_info['ruby_checksum']
-  not_if { File.exists?("#{file_cache_path}/#{ruby_file_name}") }
+  not_if { File.exists?(ruby_package_path) }
 end
 
 windows_batch "unzip_ruby" do
   code <<-EOH
-"#{node['7-zip']['home']}\\7z.exe\" x #{file_cache_path}\\#{ruby_file_name} -o#{file_cache_path} -r -y
+"#{zip_bin}\" x #{ruby_package_path} -o#{file_cache_path} -r -y
 xcopy #{unzip_dir_name} \"#{installation_directory}\" /I /e /y
 EOH
   creates "#{installation_directory}/bin/ruby.exe"
   action :run
 end
 
-windows_path "#{installation_directory}\\bin" do
+windows_path "#{windows_safe_path_join(installation_directory, "bin")}" do
   action :add
 end
 
+gem_bin_path = windows_safe_path_join(installation_directory,"bin","gem")
 
 node['opscode-ruby']['base_gems'].each do |gem|
   gem_package gem do
-    gem_binary "#{installation_directory}\\bin\\gem"
+    gem_binary gem_bin_path
   end
 end
 
@@ -82,10 +97,10 @@ if node['opscode-ruby']['windows']['dev_kit_enabled']
 
   windows_batch 'install_devkit_and_enhance_ruby' do
     code <<-EOH
-    #{file_cache_path}\\#{devkit_file_name} -y -o\"#{installation_directory}\"
-    cd \"#{installation_directory}\" & \"#{installation_directory}\\bin\\ruby.exe\" \"#{installation_directory}\\dk.rb\" install
+    #{windows_safe_path_join(file_cache_path, devkit_file_name)} -y -o\"#{installation_directory}\"
+    cd \"#{installation_directory}\" & \"#{windows_safe_path_join(installation_directory,"bin","ruby.exe")}\" \"#{windows_safe_path_join(installation_directory,"dk.rb")}\" install
     EOH
     action :run
-    not_if { ::File.exists?("#{installation_directory}\\dk.rb") }
+    not_if { ::File.exists?(windows_safe_path_join(installation_directory,"dk.rb")) }
   end
 end
