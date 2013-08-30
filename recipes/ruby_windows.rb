@@ -88,6 +88,7 @@ if node['opscode-ruby']['windows']['dev_kit_enabled']
 
   template "#{installation_directory}/config.yml" do
     source "config.yml.erb"
+    helper(:ruby_dir) { installation_directory }
   end
 
   remote_file "#{file_cache_path}/#{devkit_file_name}" do
@@ -95,12 +96,16 @@ if node['opscode-ruby']['windows']['dev_kit_enabled']
     checksum windows_ruby_devkit_urls['ruby_dev_kit_checksum']
   end
 
+  devkit_path = windows_safe_path_join(file_cache_path, devkit_file_name)
+  ruby_bin_path = windows_safe_path_join(installation_directory,"bin","ruby.exe")
+  dk_rb_path = windows_safe_path_join(installation_directory,"dk.rb")
+  
   windows_batch 'install_devkit_and_enhance_ruby' do
     code <<-EOH
-    #{windows_safe_path_join(file_cache_path, devkit_file_name)} -y -o\"#{installation_directory}\"
-    cd \"#{installation_directory}\" & \"#{windows_safe_path_join(installation_directory,"bin","ruby.exe")}\" \"#{windows_safe_path_join(installation_directory,"dk.rb")}\" install
+    #{devkit_path} -y -o\"#{installation_directory}\"
+    cd \"#{installation_directory}\" & \"#{ruby_bin_path}\" \"#{dk_rb_path}\" install
     EOH
     action :run
-    not_if { ::File.exists?(windows_safe_path_join(installation_directory,"dk.rb")) }
+    not_if { ::File.exists?(dk_rb_path) }
   end
 end
