@@ -7,18 +7,6 @@
 # All rights reserved - Do Not Redistribute
 #
 
-#
-# Helper method that can prepares safe windows paths.
-#
-
-def windows_safe_path_join(*args)
-  ::File.join(args).gsub(::File::SEPARATOR, ::File::ALT_SEPARATOR)
-end
-
-def windows_safe_path_expand(arg)
-  ::File.expand_path(arg).gsub(::File::SEPARATOR, ::File::ALT_SEPARATOR)
-end
-
 # Where to get ruby for windows based on it's version
 windows_ruby_urls = {
   "1.9.3-p448" => {
