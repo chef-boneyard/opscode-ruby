@@ -25,3 +25,4 @@ module OpscodeRuby
 end
 
 Chef::Recipe.send(:include, OpscodeRuby::Helper)
+Chef::Resource.send(:include, OpscodeRuby::Helper)
