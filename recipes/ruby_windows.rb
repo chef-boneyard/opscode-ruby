@@ -7,93 +7,102 @@
 # All rights reserved - Do Not Redistribute
 #
 
-# Where to get ruby for windows based on it's version
-windows_ruby_urls = {
-  "1.9.3-p448" => {
-    "ruby_url" => "http://dl.bintray.com/oneclick/rubyinstaller/ruby-1.9.3-p448-i386-mingw32.7z?direct",
-    "ruby_checksum" => "e317c1225ccf9fdeba951186f2a546aa",
-    "ruby_file_name" => "ruby-1.9.3-p448-i386-mingw32.7z"
-  }
-}
-
-# Where to get ruby devkit for windows
-windows_ruby_devkit_urls = {
-  "ruby_dev_kit_url" => "http://github.com/downloads/oneclick/rubyinstaller/DevKit-tdm-32-4.5.2-20110712-1620-sfx.exe",
-  "ruby_dev_kit_checksum" => "6230d9e552e69823b83d6f81a5dadc06958d7a17e10c3f8e525fcc61b300b2ef"
-}
+include_recipe '7-zip'
 
 # Currently we are only supporting installing a single ruby version on windows
-if node['opscode-ruby']['versions'].length != 1
+unless node['opscode-ruby']['versions'].kind_of?(Array) && node['opscode-ruby']['versions'].size == 1
   raise "opscode-ruby cookbook currently only supports installing a single version of ruby on windows."
 end
 
 # Determine download urls
-ruby_version = node['opscode-ruby']['versions'][0]
-ruby_download_info = windows_ruby_urls[ruby_version]
-
-if ruby_download_info.nil?
-  raise "Can not find windows download information for ruby version '#{ruby_version}'"
-end
+ruby_version = node['opscode-ruby']['versions'].first
+ruby_file_name = "ruby-#{ruby_version}-i386-mingw32.7z"
+ruby_download_url = "http://dl.bintray.com/oneclick/rubyinstaller/#{ruby_file_name}?direct"
 
 # Determine the directories which we will unpack ruby
-ruby_file_name = ruby_download_info["ruby_file_name"]
-installation_directory = windows_safe_path_join(node['opscode-ruby']['windows']['ruby_root'], ruby_version)
 file_cache_path = windows_safe_path_expand(Chef::Config[:file_cache_path])
 unzip_dir_name = windows_safe_path_join(file_cache_path, File.basename(ruby_file_name, ".7z"))
 ruby_package_path = windows_safe_path_join(file_cache_path, ruby_file_name)
 zip_bin = windows_safe_path_join(node['7-zip']['home'], "7z.exe")
 
 remote_file ruby_package_path do
-  source ruby_download_info['ruby_url']
-  checksum ruby_download_info['ruby_checksum']
+  source ruby_download_url
+  checksum node['opscode-ruby']['windows']['ruby_checksum']
   not_if { File.exists?(ruby_package_path) }
 end
+
+install_dir = windows_safe_path_join(node['opscode-ruby']['windows']['ruby_root'], ruby_version)
+ruby_bindir = windows_safe_path_join(install_dir, 'bin')
+ruby_bin = windows_safe_path_join(ruby_bindir, 'ruby.exe')
 
 windows_batch "unzip_ruby" do
   code <<-EOH
 "#{zip_bin}\" x #{ruby_package_path} -o#{file_cache_path} -r -y
-xcopy #{unzip_dir_name} \"#{installation_directory}\" /I /e /y
+xcopy #{unzip_dir_name} \"#{install_dir}\" /I /e /y
 EOH
-  creates "#{installation_directory}/bin/ruby.exe"
+  creates ruby_bin
   action :run
 end
 
-windows_path "#{windows_safe_path_join(installation_directory, "bin")}" do
+# Ensure Ruby's bin directory is in PATH
+windows_path "#{ruby_bindir}" do
   action :add
 end
 
-gem_bin_path = windows_safe_path_join(installation_directory,"bin","gem")
-
+# Install some 'base' gems
 node['opscode-ruby']['base_gems'].each do |gem|
   gem_package gem do
-    gem_binary gem_bin_path
+    gem_binary windows_safe_path_join(ruby_bindir, 'gem')
   end
 end
 
+# Optionally install Ruby DevKit for native compilation during gem installation
 if node['opscode-ruby']['windows']['dev_kit_enabled']
-  # Install devkit for native compilation during gem installation
-  devkit_file_name = ::File.basename(windows_ruby_devkit_urls['ruby_dev_kit_url'])
 
-  template "#{installation_directory}/config.yml" do
+  devkit_file_name = ::File.basename(node['opscode-ruby']['windows']['dev_kit_url'])
+
+  template windows_safe_path_join(install_dir, 'config.yml') do
     source "config.yml.erb"
-    helper(:ruby_dir) { installation_directory }
+    helper(:ruby_dir) { install_dir }
   end
 
-  remote_file "#{file_cache_path}/#{devkit_file_name}" do
-    source windows_ruby_devkit_urls['ruby_dev_kit_url']
-    checksum windows_ruby_devkit_urls['ruby_dev_kit_checksum']
+  remote_file windows_safe_path_join(file_cache_path, devkit_file_name) do
+    source node['opscode-ruby']['windows']['dev_kit_url']
+    checksum node['opscode-ruby']['windows']['dev_kit_checksum']
   end
 
   devkit_path = windows_safe_path_join(file_cache_path, devkit_file_name)
-  ruby_bin_path = windows_safe_path_join(installation_directory,"bin","ruby.exe")
-  dk_rb_path = windows_safe_path_join(installation_directory,"dk.rb")
-  
+  dk_rb_path = windows_safe_path_join(install_dir,"dk.rb")
+
   windows_batch 'install_devkit_and_enhance_ruby' do
     code <<-EOH
-    #{devkit_path} -y -o\"#{installation_directory}\"
-    cd \"#{installation_directory}\" & \"#{ruby_bin_path}\" \"#{dk_rb_path}\" install
+    #{devkit_path} -y -o\"#{install_dir}\"
+    cd \"#{install_dir}\" & \"#{ruby_bin}\" \"#{dk_rb_path}\" install
     EOH
     action :run
     not_if { ::File.exists?(dk_rb_path) }
   end
+end
+
+# Ensure a certificate authority is available and configured
+# https://gist.github.com/fnichol/867550
+
+cert_dir = windows_safe_path_join(install_dir, 'ssl', 'certs')
+cacert_file = windows_safe_path_join(cert_dir, 'cacert.pem')
+
+directory cert_dir do
+  recursive true
+  action :create
+end
+
+remote_file cacert_file do
+  source 'http://curl.haxx.se/ca/cacert.pem'
+  checksum 'f5f79efd63440f2048ead91090eaca3102d13ea17a548f72f738778a534c646d'
+  action :create
+end
+
+ENV['SSL_CERT_FILE'] = cacert_file
+
+env 'SSL_CERT_FILE' do
+  value cacert_file
 end
