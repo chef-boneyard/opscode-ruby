@@ -1,6 +1,6 @@
 #
 # Cookbook Name:: opscode-ruby
-# Recipe:: ruby_windows
+# Recipe:: _windows
 #
 # Copyright (C) 2013 Opscode, Inc
 #

@@ -9,8 +9,11 @@
 
 case node['platform_family']
 when "windows"
-  include_recipe "opscode-ruby::ruby_windows"
+
+  include_recipe "opscode-ruby::_windows"
+
 else
+
   include_recipe "rbenv::default"
   include_recipe "rbenv::ruby_build"
 
@@ -33,4 +36,5 @@ else
       to ::File.join(node['rbenv']['root'], "shims", shim)
     end
   end
+
 end
