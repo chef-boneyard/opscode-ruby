@@ -8,11 +8,14 @@
 #
 
 case node['platform_family']
-when "windows"
-  include_recipe "opscode-ruby::ruby_windows"
+when 'windows'
+
+  include_recipe 'opscode-ruby::_windows'
+
 else
-  include_recipe "rbenv::default"
-  include_recipe "rbenv::ruby_build"
+
+  include_recipe 'rbenv::default'
+  include_recipe 'rbenv::ruby_build'
 
   node['opscode-ruby']['versions'].each do |v|
     rbenv_ruby v do
@@ -30,7 +33,8 @@ else
   %w{ bundle erb gem irb rake rdoc ri ruby testrb }.each do |shim|
     user_local_path = "/usr/local/bin/#{shim}"
     link user_local_path do
-      to ::File.join(node['rbenv']['root'], "shims", shim)
+      to ::File.join(node['rbenv']['root'], 'shims', shim)
     end
   end
+
 end
