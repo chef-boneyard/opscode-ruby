@@ -1,13 +1,36 @@
-## 1.1.0 (October 31, 2013)
+opscode-ruby Cookbook CHANGELOG
+===============================
+This file is used to list changes made in each version of the
+opscode-ruby cookbook.
 
-* Bump rbenv cookbook to 1.6.5
-* Bump default Ruby to 1.9.3p448 (latest stable in 1.9 series)
+v1.2.0
+-------
+### Improvement
+- Change default Ruby to 1.9.3-p484 (addresses [CVE-2013-4164])
+- Refactor recipe to install Ruby on Windows
+- Update `.kitchen.yml` for final 1.0 format.
+- Add BATS integration tests.
+- Add Foodcritic support.
+- Add Rubocop support.
 
-## 1.0.0 (September 9, 2013)
+## Bug
+- Ensure cookbook relies on 7-zip (needed for Windows install).
 
-* Make ruby_versions, global ruby version and base gems configurable.
-* Ability to install ruby on windows. Single version installation only.
+v1.1.0
+-------
+### Improvement
+- Bump rbenv cookbook to 1.6.5
+- Bump default Ruby to 1.9.3p448 (latest stable in 1.9 series)
 
-## 0.1.1 (March 12, 2013)
+v1.0.0
+-------
+### Improvement
+- Make ruby_versions, global ruby version and base gems configurable.
 
-* The initial release.
+### Feature
+- Ability to install ruby on windows. Single version installation only.
+
+v0.1.1
+-------
+### Feature
+- The initial release.
