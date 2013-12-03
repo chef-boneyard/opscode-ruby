@@ -8,6 +8,7 @@
 #
 
 module OpscodeRuby
+  #
   module Helper
     #
     # Helper method that can prepares safe windows paths.
@@ -20,7 +21,6 @@ module OpscodeRuby
     def windows_safe_path_expand(arg)
       ::File.expand_path(arg).gsub(::File::SEPARATOR, ::File::ALT_SEPARATOR)
     end
-
   end
 end
 

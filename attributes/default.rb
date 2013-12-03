@@ -7,9 +7,9 @@
 # All rights reserved - Do Not Redistribute
 #
 
-default['opscode-ruby']['versions']  = [ "1.9.3-p484" ]
+default['opscode-ruby']['versions']  = %w{ 1.9.3-p484 }
 default['opscode-ruby']['base_gems'] = %w{ bundler mixlib-shellout }
-default['opscode-ruby']['global']    = "1.9.3-p484"
+default['opscode-ruby']['global']    = '1.9.3-p484'
 
 default['opscode-ruby']['windows']['ruby_root']        = "#{ENV['SYSTEMDRIVE']}\\ruby"
 default['opscode-ruby']['windows']['ruby_checksum']    = '2dd1bfc4d48a5690480eea94a2b53450a39ef8f46f7d65f9e806485b0b2efdf5'

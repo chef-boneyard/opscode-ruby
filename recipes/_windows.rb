@@ -11,7 +11,7 @@ include_recipe '7-zip'
 
 # Currently we are only supporting installing a single ruby version on windows
 unless node['opscode-ruby']['versions'].kind_of?(Array) && node['opscode-ruby']['versions'].size == 1
-  raise "opscode-ruby cookbook currently only supports installing a single version of ruby on windows."
+  fail 'opscode-ruby cookbook currently only supports installing a single version of ruby on windows.'
 end
 
 # Determine download urls
@@ -21,9 +21,9 @@ ruby_download_url = "http://dl.bintray.com/oneclick/rubyinstaller/#{ruby_file_na
 
 # Determine the directories which we will unpack ruby
 file_cache_path = windows_safe_path_expand(Chef::Config[:file_cache_path])
-unzip_dir_name = windows_safe_path_join(file_cache_path, File.basename(ruby_file_name, ".7z"))
+unzip_dir_name = windows_safe_path_join(file_cache_path, File.basename(ruby_file_name, '.7z'))
 ruby_package_path = windows_safe_path_join(file_cache_path, ruby_file_name)
-zip_bin = windows_safe_path_join(node['7-zip']['home'], "7z.exe")
+zip_bin = windows_safe_path_join(node['7-zip']['home'], '7z.exe')
 
 remote_file ruby_package_path do
   source ruby_download_url
@@ -35,7 +35,7 @@ install_dir = windows_safe_path_join(node['opscode-ruby']['windows']['ruby_root'
 ruby_bindir = windows_safe_path_join(install_dir, 'bin')
 ruby_bin = windows_safe_path_join(ruby_bindir, 'ruby.exe')
 
-windows_batch "unzip_ruby" do
+windows_batch 'unzip_ruby' do
   code <<-EOH
 "#{zip_bin}\" x #{ruby_package_path} -o#{file_cache_path} -r -y
 xcopy #{unzip_dir_name} \"#{install_dir}\" /I /e /y
@@ -62,7 +62,7 @@ if node['opscode-ruby']['windows']['dev_kit_enabled']
   devkit_file_name = ::File.basename(node['opscode-ruby']['windows']['dev_kit_url'])
 
   template windows_safe_path_join(install_dir, 'config.yml') do
-    source "config.yml.erb"
+    source 'config.yml.erb'
     helper(:ruby_dir) { install_dir }
   end
 
@@ -72,7 +72,7 @@ if node['opscode-ruby']['windows']['dev_kit_enabled']
   end
 
   devkit_path = windows_safe_path_join(file_cache_path, devkit_file_name)
-  dk_rb_path = windows_safe_path_join(install_dir,"dk.rb")
+  dk_rb_path = windows_safe_path_join(install_dir, 'dk.rb')
 
   windows_batch 'install_devkit_and_enhance_ruby' do
     code <<-EOH
