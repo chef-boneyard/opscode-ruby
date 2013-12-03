@@ -45,7 +45,7 @@ EOH
 end
 
 # Ensure Ruby's bin directory is in PATH
-windows_path "#{ruby_bindir}" do
+windows_path ruby_bindir do
   action :add
 end
 
