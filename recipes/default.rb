@@ -14,8 +14,13 @@ when 'windows'
 
 else
 
-  include_recipe 'rbenv::default'
-  include_recipe 'rbenv::ruby_build'
+  # Workaround for CHEF-3940
+  with_home_for_user(node['rbenv']['user']) do
+
+    include_recipe 'rbenv::default'
+    include_recipe 'rbenv::ruby_build'
+
+  end
 
   node['opscode-ruby']['versions'].each do |v|
     rbenv_ruby v do
