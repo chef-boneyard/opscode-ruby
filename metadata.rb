@@ -4,7 +4,7 @@ maintainer_email 'cm@opscode.com'
 license          'All rights reserved'
 description      "Installs/Configures Ruby for Opscode's infrastructure"
 long_description IO.read(File.join(File.dirname(__FILE__), 'README.md'))
-version          '1.2.0'
+version          '1.2.1'
 
 # This is a community cookbook:
 # http://community.opscode.com/cookbooks/rbenv

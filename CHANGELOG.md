@@ -3,6 +3,14 @@ opscode-ruby Cookbook CHANGELOG
 This file is used to list changes made in each version of the
 opscode-ruby cookbook.
 
+v1.2.1
+-------
+### Improvement
+- Add CentOS to `.kitchen.yml`.
+
+### Bug
+- Add a workaround for [CHEF-3940]
+
 v1.2.0
 -------
 ### Improvement
@@ -13,7 +21,7 @@ v1.2.0
 - Add Foodcritic support.
 - Add Rubocop support.
 
-## Bug
+### Bug
 - Ensure cookbook relies on 7-zip (needed for Windows install).
 
 v1.1.0
