@@ -20,6 +20,8 @@ suites:
   run_list:
   - recipe[opscode-ruby]
   attributes:
+    opscode-ruby:
+      rbenv_uid: 393
     versions:
     - 1.9.3-p484
     global: 1.9.3-p484

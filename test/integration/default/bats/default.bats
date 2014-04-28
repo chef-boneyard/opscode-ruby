@@ -10,3 +10,11 @@
   run gem list mixlib-shellout -i
   [ "$status" -eq 0 ]
 }
+
+@test "creates the rbenv user with a specific UID" {
+  [ "x393" == "x`getent passwd rbenv | awk -F: '{print $3}'`" ]
+}
+
+@test "creates the rbenv group with the same UID as the user" {
+  [ "x393" == "x`getent group rbenv | awk -F: '{print $3}'`" ]
+}
