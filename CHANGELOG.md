@@ -3,6 +3,15 @@ opscode-ruby Cookbook CHANGELOG
 This file is used to list changes made in each version of the
 opscode-ruby cookbook.
 
+v1.3.0
+------
+### Improvement
+- Add Ubuntu 14.04 to `.kitchen.yml`
+
+### New Feature
+- Add rbenv UID attribute
+- Set rbenv user/group to UID/GID per attribute
+
 v1.2.1
 -------
 ### Improvement
@@ -33,7 +42,7 @@ v1.1.0
 v1.0.0
 -------
 ### Improvement
-- Make ruby_versions, global ruby version and base gems configurable.
+- Make `ruby_versions`, global ruby version and base gems configurable.
 
 ### Feature
 - Ability to install ruby on windows. Single version installation only.
