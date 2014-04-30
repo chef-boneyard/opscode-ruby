@@ -22,6 +22,13 @@ else
 
   end
 
+  # OPS-99: Set the GID of the group and UID of the user with the UID
+  # attribute defined in this cookbook's attributes file.
+  g = resources('group[rbenv]')
+  g.gid(node['opscode-ruby']['rbenv_uid'])
+  u = resources('user[rbenv]')
+  u.uid(node['opscode-ruby']['rbenv_uid'])
+
   node['opscode-ruby']['versions'].each do |v|
     rbenv_ruby v do
       global v == node['opscode-ruby']['global']

@@ -14,12 +14,17 @@ platforms:
 - name: ubuntu-10.04
   run_list:
   - recipe[apt]
+- name: ubuntu-14.04
+  run_list:
+  - recipe[apt]
 
 suites:
 - name: default
   run_list:
   - recipe[opscode-ruby]
   attributes:
+    opscode-ruby:
+      rbenv_uid: 393
     versions:
     - 1.9.3-p484
     global: 1.9.3-p484
